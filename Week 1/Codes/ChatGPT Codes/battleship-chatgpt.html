@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(20, 30px);
+            grid-template-rows: repeat(20, 30px);
+            gap: 2px;
+            margin: 10px;
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: lightblue;
+            border: 1px solid #ccc;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+        }
+        .cell.occupied {
+            background-color: lightgray;
+        }
+        .cell.hit {
+            background-color: red;
+        }
+        .cell.miss {
+            background-color: white;
+        }
+        .grid-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Battleship Game</h1>
+    <div class="grid-container">
+        <div>
+            <h2>Your Grid</h2>
+            <div id="player-grid" class="grid"></div>
+        </div>
+        <div>
+            <h2>Enemy Grid</h2>
+            <div id="enemy-grid" class="grid"></div>
+        </div>
+    </div>
+    <button id="start-button">Start</button>
+    <script>
+        const playerGrid = document.getElementById('player-grid');
+        const enemyGrid = document.getElementById('enemy-grid');
+        const startButton = document.getElementById('start-button');
+        const gridSize = 20;
+        const ships = [
+            { name: 'Battleship', size: 5 },
+            { name: 'Carrier', size: 4 },
+            { name: 'Cruiser', size: 3 },
+            { name: 'Destroyer', size: 3 },
+            { name: 'Submarine', size: 2 }
+        ];
+        let isPlacingShips = true;
+        let selectedShipIndex = 0;
+
+        function createGrid(gridElement) {
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = i;
+                gridElement.appendChild(cell);
+            }
+        }
+
+        function placeShip(event) {
+            if (!isPlacingShips) return;
+
+            const cells = Array.from(playerGrid.children);
+            const index = parseInt(event.target.dataset.index);
+            const ship = ships[selectedShipIndex];
+
+            if (canPlaceShip(index, ship.size, cells)) {
+                for (let i = 0; i < ship.size; i++) {
+                    cells[index + i].classList.add('occupied');
+                }
+                selectedShipIndex++;
+                if (selectedShipIndex >= ships.length) {
+                    isPlacingShips = false;
+                    alert('All ships placed! Click Start to begin.');
+                }
+            } else {
+                alert('Cannot place ship here.');
+            }
+        }
+
+        function canPlaceShip(index, size, cells) {
+            const rowStart = Math.floor(index / gridSize) * gridSize;
+            const rowEnd = rowStart + gridSize;
+
+            if (index + size > rowEnd) return false;
+
+            for (let i = 0; i < size; i++) {
+                if (cells[index + i].classList.contains('occupied')) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function startGame() {
+            if (isPlacingShips) {
+                alert('Finish placing your ships first!');
+                return;
+            }
+
+            startButton.disabled = true;
+            alert('Game started! Select tiles on the enemy grid to attack.');
+            enableEnemyGrid();
+        }
+
+        function enableEnemyGrid() {
+            Array.from(enemyGrid.children).forEach(cell => {
+                cell.addEventListener('click', attackCell);
+            });
+        }
+
+        function attackCell(event) {
+            const cell = event.target;
+            if (cell.classList.contains('hit') || cell.classList.contains('miss')) {
+                alert('You already attacked this cell!');
+                return;
+            }
+
+            const hit = Math.random() < 0.3; // Simulate hit/miss with 30% hit chance
+            cell.classList.add(hit ? 'hit' : 'miss');
+
+            if (!hit) {
+                botTurn();
+            }
+        }
+
+        function botTurn() {
+            const cells = Array.from(playerGrid.children).filter(cell => 
+                !cell.classList.contains('hit') && !cell.classList.contains('miss'));
+            const randomCell = cells[Math.floor(Math.random() * cells.length)];
+
+            const hit = randomCell.classList.contains('occupied');
+            randomCell.classList.add(hit ? 'hit' : 'miss');
+
+            if (!hit) {
+                alert('Your turn!');
+            } else {
+                setTimeout(botTurn, 500); // Bot gets another turn if it hits
+            }
+        }
+
+        createGrid(playerGrid);
+        createGrid(enemyGrid);
+        playerGrid.addEventListener('click', placeShip);
+        startButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html>

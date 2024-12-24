@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RGV Jump Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const RGV = {
+            x: 50,
+            y: canvas.height - 150,
+            width: 50,
+            height: 50,
+            color: '#007bff',
+            velocityY: 0,
+            gravity: 1,
+            isJumping: false
+        };
+
+        const obstacles = [];
+        const obstacleSpeed = 5;
+
+        let score = 0;
+        let gameRunning = true;
+
+        function createObstacle() {
+            const size = Math.random() * 40 + 30;
+            const gap = Math.random() * 1000 + 500; // Randomize obstacle spawn interval
+            obstacles.push({
+                x: canvas.width,
+                y: canvas.height - size,
+                width: size,
+                height: size
+            });
+            setTimeout(createObstacle, gap);
+        }
+
+        function update() {
+            if (!gameRunning) return;
+
+            // RGV Physics
+            if (RGV.isJumping) {
+                RGV.velocityY += RGV.gravity;
+                RGV.y += RGV.velocityY;
+
+                if (RGV.y > canvas.height - 150) {
+                    RGV.y = canvas.height - 150;
+                    RGV.isJumping = false;
+                }
+            }
+
+            // Move and remove obstacles
+            obstacles.forEach((obstacle, index) => {
+                obstacle.x -= obstacleSpeed;
+                if (obstacle.x + obstacle.width < 0) {
+                    obstacles.splice(index, 1);
+                    score++;
+                }
+            });
+
+            // Collision detection
+            obstacles.forEach(obstacle => {
+                if (
+                    RGV.x < obstacle.x + obstacle.width &&
+                    RGV.x + RGV.width > obstacle.x &&
+                    RGV.y + RGV.height >= obstacle.y
+                ) {
+                    gameRunning = false;
+                }
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw RGV
+            ctx.fillStyle = RGV.color;
+            ctx.fillRect(RGV.x, RGV.y, RGV.width, RGV.height);
+
+            // Draw obstacles
+            ctx.fillStyle = '#ff5733';
+            obstacles.forEach(obstacle => {
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+
+            // Draw score
+            ctx.fillStyle = '#000';
+            ctx.font = '20px Arial';
+            ctx.fillText(`Score: ${score}`, 20, 30);
+
+            if (!gameRunning) {
+                ctx.font = '40px Arial';
+                ctx.fillText('Game Over! Press R to Restart.', canvas.width / 2 - 200, canvas.height / 2);
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            if (gameRunning) {
+                requestAnimationFrame(loop);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !RGV.isJumping) {
+                RGV.velocityY = -15;
+                RGV.isJumping = true;
+            } else if (e.code === 'KeyR' && !gameRunning) {
+                // Reset game
+                gameRunning = true;
+                obstacles.length = 0;
+                score = 0;
+                RGV.y = canvas.height - 150;
+                loop();
+            }
+        });
+
+        // Start the obstacle creation loop with a delay
+        setTimeout(createObstacle, 1500);
+
+        loop();
+    </script>
+</body>
+</html>

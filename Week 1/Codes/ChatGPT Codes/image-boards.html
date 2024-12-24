@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Board</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+        }
+        .board {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .thread {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 10px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        .message img {
+            max-width: 200px;
+            display: block;
+            margin-top: 10px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        form input, form textarea {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        form button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="board">
+        <h1>Image Board</h1>
+
+        <!-- New Thread Form -->
+        <form id="new-thread-form">
+            <h2>Create New Thread</h2>
+            <input type="text" id="thread-title" placeholder="Thread Title" required>
+            <textarea id="thread-message" placeholder="Message" required></textarea>
+            <input type="file" id="thread-image">
+            <button type="submit">Create Thread</button>
+        </form>
+
+        <!-- Threads -->
+        <div id="threads">
+            <!-- Threads will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        const threadsContainer = document.getElementById('threads');
+        const newThreadForm = document.getElementById('new-thread-form');
+
+        const formatDate = (date) => {
+            return date.toISOString().replace(/[-:T]/g, '').split('.')[0];
+        };
+
+        newThreadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Get thread details
+            const title = document.getElementById('thread-title').value;
+            const message = document.getElementById('thread-message').value;
+            const imageFile = document.getElementById('thread-image').files[0];
+            const threadId = formatDate(new Date());
+            const creationTime = new Date().toLocaleString();
+
+            // Create thread element
+            const thread = document.createElement('div');
+            thread.classList.add('thread');
+
+            const threadHeader = document.createElement('div');
+            threadHeader.innerHTML = `<strong>Thread ID:</strong> ${threadId} <em>(Created: ${creationTime})</em>`;
+
+            const threadTitle = document.createElement('h3');
+            threadTitle.textContent = title;
+
+            const threadMessage = document.createElement('div');
+            threadMessage.classList.add('message');
+            threadMessage.textContent = message;
+
+            // Handle image upload
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    threadMessage.appendChild(img);
+                };
+                reader.readAsDataURL(imageFile);
+            }
+
+            // Reply form
+            const replyForm = document.createElement('form');
+            replyForm.innerHTML = `
+                <textarea placeholder="Reply to thread" required></textarea>
+                <input type="file">
+                <button type="submit">Reply</button>
+            `;
+            replyForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const replyMessage = replyForm.querySelector('textarea').value;
+                const replyImageFile = replyForm.querySelector('input[type=file]').files[0];
+                const replyId = formatDate(new Date());
+
+                const reply = document.createElement('div');
+                reply.classList.add('message');
+
+                const replyHeader = document.createElement('div');
+                replyHeader.innerHTML = `Anonymous post: <a href="#" onclick="addQuote('${replyId}')">${replyId}</a>`;
+
+                reply.appendChild(replyHeader);
+                reply.appendChild(document.createTextNode(replyMessage));
+
+                if (replyImageFile) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        reply.appendChild(img);
+                    };
+                    reader.readAsDataURL(replyImageFile);
+                }
+
+                thread.appendChild(reply);
+                replyForm.reset();
+            });
+
+            // Append elements
+            thread.appendChild(threadHeader);
+            thread.appendChild(threadTitle);
+            thread.appendChild(threadMessage);
+            thread.appendChild(replyForm);
+            threadsContainer.appendChild(thread);
+
+            // Reset form
+            newThreadForm.reset();
+        });
+
+        window.addQuote = (replyId) => {
+            const replyBox = document.querySelector('textarea');
+            replyBox.value += `>>${replyId}\n`;
+            replyBox.focus();
+        };
+    </script>
+</body>
+</html>
