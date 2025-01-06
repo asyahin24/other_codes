@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable Calculator Window</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f4f4f9;
+        }
+        .draggable-window {
+            position: absolute;
+            width: 400px;
+            height: 600px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            resize: both;
+        }
+        .draggable-header {
+            cursor: move;
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            font-size: 16px;
+            border-bottom: 1px solid #ccc;
+        }
+        iframe {
+            width: 100%;
+            height: calc(100% - 40px);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="draggable-window" id="calculatorWindow">
+        <div class="draggable-header">Calculator</div>
+        <iframe src="my-calculator-resizeable.html"></iframe>
+    </div>
+
+    <script>
+        const draggableWindow = document.getElementById('calculatorWindow');
+        const header = draggableWindow.querySelector('.draggable-header');
+
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        header.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - draggableWindow.offsetLeft;
+            offsetY = e.clientY - draggableWindow.offsetTop;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+
+        function onMouseMove(e) {
+            if (!isDragging) return;
+            draggableWindow.style.left = `${e.clientX - offsetX}px`;
+            draggableWindow.style.top = `${e.clientY - offsetY}px`;
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+    </script>
+</body>
+</html>

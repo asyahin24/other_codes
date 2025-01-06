@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scientific Calculator</title>
+    <style>
+        .calculator-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .calculator {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .display {
+            width: 100%;
+            height: 60px;
+            margin-bottom: 10px;
+            font-size: 24px;
+            text-align: right;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .operator {
+            background-color: #f8f8f8;
+        }
+
+        .equals {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .clear {
+            background-color: #ff4444;
+            color: white;
+        }
+
+        .history-panel {
+            min-width: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 10px;
+        }
+
+        .history-item {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .expression {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .result {
+            color: #333;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator">
+            <input type="text" class="display" id="display" readonly>
+            <div class="buttons">
+                <button onclick="addToDisplay('sin(')" class="operator">sin</button>
+                <button onclick="addToDisplay('cos(')" class="operator">cos</button>
+                <button onclick="addToDisplay('tan(')" class="operator">tan</button>
+                <button onclick="addToDisplay('(')" class="operator">(</button>
+                <button onclick="addToDisplay(')')" class="operator">)</button>
+
+                <button onclick="addToDisplay('sqrt(')" class="operator">√</button>
+                <button onclick="addToDisplay('7')">7</button>
+                <button onclick="addToDisplay('8')">8</button>
+                <button onclick="addToDisplay('9')">9</button>
+                <button onclick="addToDisplay('/')" class="operator">÷</button>
+
+                <button onclick="addToDisplay('pow(')" class="operator">x^n</button>
+                <button onclick="addToDisplay('4')">4</button>
+                <button onclick="addToDisplay('5')">5</button>
+                <button onclick="addToDisplay('6')">6</button>
+                <button onclick="addToDisplay('*')" class="operator">×</button>
+
+                <button onclick="addToDisplay('log(')" class="operator">log</button>
+                <button onclick="addToDisplay('1')">1</button>
+                <button onclick="addToDisplay('2')">2</button>
+                <button onclick="addToDisplay('3')">3</button>
+                <button onclick="addToDisplay('-')" class="operator">-</button>
+
+                <button onclick="addToDisplay('pi')" class="operator">π</button>
+                <button onclick="addToDisplay('0')">0</button>
+                <button onclick="addToDisplay('.')">.</button>
+                <button onclick="calculate()" class="equals">=</button>
+                <button onclick="addToDisplay('+')" class="operator">+</button>
+
+                <button onclick="clearDisplay()" class="clear">C</button>
+                <button onclick="backspace()" class="clear">⌫</button>
+                <button onclick="addToDisplay('e')" class="operator">e</button>
+                <button onclick="clearHistory()" class="clear">Clear History</button>
+                <button onclick="addToDisplay(',')">,</button>
+            </div>
+        </div>
+        <div class="history-panel" id="history">
+            <h3>History</h3>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let history = document.getElementById('history');
+
+        function addToDisplay(value) {
+            display.value += value;
+        }
+
+        function clearDisplay() {
+            display.value = '';
+        }
+
+        function backspace() {
+            display.value = display.value.slice(0, -1);
+        }
+
+        function clearHistory() {
+            history.innerHTML = '<h3>History</h3>';
+        }
+
+        function addToHistory(expression, result) {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <div class="expression">${expression}</div>
+                <div class="result">${result}</div>
+            `;
+            history.insertBefore(historyItem, history.children[1]);
+        }
+
+        function calculate() {
+            try {
+                let expression = display.value;
+                // Replace mathematical functions with JavaScript equivalents
+                expression = expression.replace(/sin\(/g, 'Math.sin(');
+                expression = expression.replace(/cos\(/g, 'Math.cos(');
+                expression = expression.replace(/tan\(/g, 'Math.tan(');
+                expression = expression.replace(/sqrt\(/g, 'Math.sqrt(');
+                expression = expression.replace(/log\(/g, 'Math.log10(');
+                expression = expression.replace(/pow\(/g, 'Math.pow(');
+                expression = expression.replace(/pi/g, 'Math.PI');
+                expression = expression.replace(/e/g, 'Math.E');
+
+                const result = eval(expression);
+                addToHistory(display.value, result);
+                display.value = result;
+            } catch (error) {
+                display.value = 'Error';
+            }
+        }
+
+        // Add keyboard support
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            if (key >= '0' && key <= '9' || key === '.' || key === '+' || key === '-' || 
+                key === '*' || key === '/' || key === '(' || key === ')' || key === ',') {
+                addToDisplay(key);
+            } else if (key === 'Enter') {
+                calculate();
+            } else if (key === 'Backspace') {
+                backspace();
+            } else if (key === 'Escape') {
+                clearDisplay();
+            }
+        });
+    </script>
+</body>
+</html>

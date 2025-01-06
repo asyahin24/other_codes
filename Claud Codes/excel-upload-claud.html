@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Upload with Summary and Graph</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        .upload-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .summary-row {
+            background-color: #e6f3ff;
+            font-weight: bold;
+        }
+        .floating-window {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 500px;
+            height: 400px;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            resize: both;
+            overflow: auto;
+        }
+        .window-header {
+            padding: 10px;
+            background: #f2f2f2;
+            cursor: move;
+            user-select: none;
+        }
+        .graph-container {
+            padding: 20px;
+            height: calc(100% - 60px);
+        }
+        .editable {
+            min-width: 50px;
+            border: none;
+            background: transparent;
+            font-weight: bold;
+            width: 100%;
+        }
+        .editable:focus {
+            outline: 2px solid #007bff;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <input type="file" id="excelFile" accept=".xlsx, .xls" />
+        <button onclick="handleFileUpload()">Upload Excel</button>
+    </div>
+
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th><input type="text" class="editable" value="Column 1" onchange="updateGraph()"></th>
+                <th><input type="text" class="editable" value="Column 2" onchange="updateGraph()"></th>
+                <th><input type="text" class="editable" value="Column 3" onchange="updateGraph()"></th>
+                <th><input type="text" class="editable" value="Column 4" onchange="updateGraph()"></th>
+                <th><input type="text" class="editable" value="Column 5" onchange="updateGraph()"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 20 empty rows -->
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr class="summary-row">
+                <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="floating-window" id="graphWindow">
+        <div class="window-header" id="graphHeader">Column Sums Graph</div>
+        <div class="graph-container">
+            <canvas id="columnChart"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script>
+        // Make the window draggable
+        const graphWindow = document.getElementById('graphWindow');
+        const header = document.getElementById('graphHeader');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+
+        header.addEventListener('mousedown', dragStart);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', dragEnd);
+
+        function dragStart(e) {
+            initialX = e.clientX - graphWindow.offsetLeft;
+            initialY = e.clientY - graphWindow.offsetTop;
+            isDragging = true;
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                graphWindow.style.left = currentX + "px";
+                graphWindow.style.top = currentY + "px";
+            }
+        }
+
+        function dragEnd(e) {
+            isDragging = false;
+        }
+
+        // Initialize chart
+        let columnChart;
+        function initChart() {
+            const ctx = document.getElementById('columnChart').getContext('2d');
+            columnChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Column Sums',
+                        data: [],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        initChart();
+
+        // Function to calculate column sums and update graph
+        function updateSumsAndGraph() {
+            const table = document.getElementById('dataTable');
+            const rows = table.getElementsByTagName('tr');
+            const columnCount = 5;
+            const sums = new Array(columnCount).fill(0);
+            
+            // Calculate sums for each column (excluding header and summary row)
+            for (let i = 1; i < rows.length - 1; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                for (let j = 0; j < columnCount; j++) {
+                    const value = cells[j].textContent.trim();
+                    if (value === '') {
+                        sums[j] += 0;
+                    } else if (!isNaN(value)) {
+                        sums[j] += parseFloat(value);
+                    } else {
+                        sums[j] += 1;
+                    }
+                }
+            }
+
+            // Update summary row
+            const summaryRow = rows[rows.length - 1].getElementsByTagName('td');
+            for (let j = 0; j < columnCount; j++) {
+                summaryRow[j].textContent = sums[j];
+            }
+
+            updateGraph();
+        }
+
+        // Function to update the graph
+        function updateGraph() {
+            const headers = Array.from(document.querySelectorAll('.editable')).map(input => input.value);
+            const summaryRow = document.querySelector('.summary-row').getElementsByTagName('td');
+            const sums = Array.from(summaryRow).map(cell => parseFloat(cell.textContent));
+
+            columnChart.data.labels = headers;
+            columnChart.data.datasets[0].data = sums;
+            columnChart.update();
+        }
+
+        // Handle file upload
+        function handleFileUpload() {
+            const fileInput = document.getElementById('excelFile');
+            const file = fileInput.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    const tbody = document.querySelector('#dataTable tbody');
+                    const rows = tbody.getElementsByTagName('tr');
+                    
+                    // Populate data rows (excluding summary row)
+                    for (let i = 0; i < 20; i++) {
+                        const row = rows[i];
+                        const cells = row.getElementsByTagName('td');
+                        for (let j = 0; j < 5; j++) {
+                            cells[j].textContent = jsonData[i] && jsonData[i][j] ? jsonData[i][j] : '';
+                        }
+                    }
+                    
+                    updateSumsAndGraph();
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert('Please select a file first');
+            }
+        }
+
+        // Add event listener to table cells for updates
+        document.getElementById('dataTable').addEventListener('input', function(e) {
+            if (e.target.tagName === 'TD') {
+                updateSumsAndGraph();
+            }
+        });
+
+        // Make table cells editable
+        const cells = document.querySelectorAll('#dataTable td');
+        cells.forEach(cell => {
+            cell.setAttribute('contenteditable', 'true');
+        });
+    </script>
+</body>
+</html>

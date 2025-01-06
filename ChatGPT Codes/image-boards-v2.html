@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Board</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+        }
+        .board {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .thread {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 10px;
+            position: relative;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+        .message img {
+            max-width: 200px;
+            margin-right: 10px;
+        }
+        .message.thread-start img {
+            order: 0;
+            margin-right: 10px;
+        }
+        .message.thread-start .text {
+            order: 1;
+        }
+        .message .text {
+            flex: 1;
+        }
+        .message .text pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        .message .text pre.green {
+            color: green;
+        }
+        .message .header {
+            margin-bottom: 20px;
+        }
+        .preview {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: none;
+            max-width: 300px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        form input, form textarea {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        form button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="board">
+        <h1>Image Board</h1>
+
+        <!-- New Thread Form -->
+        <form id="new-thread-form">
+            <h2>Create New Thread</h2>
+            <input type="text" id="thread-title" placeholder="Thread Title" required>
+            <textarea id="thread-message" placeholder="Message" required></textarea>
+            <input type="file" id="thread-image">
+            <button type="submit">Create Thread</button>
+        </form>
+
+        <!-- Threads -->
+        <div id="threads">
+            <!-- Threads will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        const threadsContainer = document.getElementById('threads');
+        const newThreadForm = document.getElementById('new-thread-form');
+
+        const formatDate = (date) => {
+            return date.toISOString().replace(/[-:T]/g, '').split('.')[0];
+        };
+
+        const showPreview = (e, replyId) => {
+            const preview = document.createElement('div');
+            preview.className = 'preview';
+            preview.textContent = document.getElementById(replyId)?.textContent || 'Reply not found';
+            document.body.appendChild(preview);
+
+            const rect = e.target.getBoundingClientRect();
+            preview.style.top = `${rect.bottom + window.scrollY}px`;
+            preview.style.left = `${rect.left + window.scrollX}px`;
+            preview.style.display = 'block';
+
+            e.target.addEventListener('mouseleave', () => {
+                preview.remove();
+            });
+        };
+
+        const addQuote = (replyId) => {
+            const replyBox = document.querySelector('textarea');
+            replyBox.value += `>>${replyId}\n`;
+            replyBox.focus();
+        };
+
+        const parseMessage = (message) => {
+            const lines = message.split('\n');
+            return lines.map(line => {
+                if (line.startsWith('>')) {
+                    return `<pre class="green">${line}</pre>`;
+                } else {
+                    return `<pre>${line}</pre>`;
+                }
+            }).join('');
+        };
+
+        newThreadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Get thread details
+            const title = document.getElementById('thread-title').value;
+            const message = document.getElementById('thread-message').value;
+            const imageFile = document.getElementById('thread-image').files[0];
+            const threadId = formatDate(new Date());
+            const creationTime = new Date().toLocaleString();
+
+            // Create thread element
+            const thread = document.createElement('div');
+            thread.classList.add('thread');
+            thread.id = `thread-${threadId}`;
+
+            const threadHeader = document.createElement('div');
+            threadHeader.innerHTML = `<strong>Thread ID:</strong> ${threadId} <em>(Created: ${creationTime})</em>`;
+
+            const threadTitle = document.createElement('h3');
+            threadTitle.textContent = title;
+
+            const threadMessage = document.createElement('div');
+            threadMessage.classList.add('message', 'thread-start');
+
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('text');
+            messageContent.innerHTML = parseMessage(message);
+
+            // Handle image upload
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    threadMessage.appendChild(img);
+                };
+                reader.readAsDataURL(imageFile);
+            }
+
+            threadMessage.appendChild(messageContent);
+
+            // Reply form
+            const replyForm = document.createElement('form');
+            replyForm.innerHTML = `
+                <textarea placeholder="Reply to thread" required></textarea>
+                <input type="file">
+                <button type="submit">Reply</button>
+            `;
+            replyForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const replyMessage = replyForm.querySelector('textarea').value;
+                const replyImageFile = replyForm.querySelector('input[type=file]').files[0];
+                const replyId = `${threadId}-${formatDate(new Date())}`;
+
+                const reply = document.createElement('div');
+                reply.classList.add('message');
+                reply.id = replyId;
+
+                const replyHeader = document.createElement('div');
+                replyHeader.classList.add('header');
+                replyHeader.innerHTML = `Anonymous post: <a href="#${replyId}" onmouseover="showPreview(event, '${replyId}')" onclick="addQuote('${replyId}')">${replyId}</a>`;
+
+                const replyContent = document.createElement('div');
+                replyContent.classList.add('text');
+                replyContent.innerHTML = parseMessage(replyMessage);
+
+                // Move images to the left in replies
+                if (replyImageFile) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.order = 0; // Ensure image order
+                        img.style.marginRight = '10px'; // Adjust spacing
+                        reply.prepend(img);
+                    };
+                    reader.readAsDataURL(replyImageFile);
+                }
+
+                reply.appendChild(replyHeader);
+                reply.appendChild(replyContent);
+                thread.appendChild(reply);
+                replyForm.reset();
+            });
+
+            // Append elements
+            thread.appendChild(threadHeader);
+            thread.appendChild(threadTitle);
+            thread.appendChild(threadMessage);
+            thread.appendChild(replyForm);
+            threadsContainer.appendChild(thread);
+
+            // Reset form
+            newThreadForm.reset();
+        });
+    </script>
+</body>
+</html>

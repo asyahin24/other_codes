@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Journal Entry</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="basicstyle.css"> 
+    <!--Fixed some things. Added article:hover -->
+</head>
+
+ <!-- Copied from ww3school-->
+ <style> 
+    div.dotted {
+        border-style: dotted;
+        padding-top: 10px;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+    }
+    article.dotted {
+        margin: 10px;           /* Added new margins */
+        border-style: dotted;
+        padding-top: 10px;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+    }
+    article:hover {     
+        border-style: double;
+        padding-top: 10px;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+        background-color: rgb(204, 204, 204);
+    }
+    p.dashed {border-style: dashed;}
+    p.solid {border-style: solid;}
+    p.double {border-style: double;}
+    p.groove {border-style: groove;}
+    p.ridge {border-style: ridge;}
+    p.inset {border-style: inset;}
+    p.outset {border-style: outset;}
+    p.none {border-style: none;}
+    p.hidden {border-style: hidden;}
+    p.mix {border-style: dotted dashed solid double;}
+</style>
+
+<body>
+    <header>
+        <h1>MERN 2024-12 BOOTCAMP</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="new-entry.html">New Entry</a></li>
+                <li><a href="all-journals.html">All Journals</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div style="font-size: 25px">
+            <strong>Main Journals</strong>
+        </div>
+
+        <!-- Journal 1 -->
+        <article class="dotted">
+            <h2>Week 0 - Taklimat Sebelum Kelas</h2> <!-- Title-->
+            <p><strong>Date:</strong> 2024/12/17</p>    <!-- Date-->
+            <p>Before start class. Taklimat for what the class covers.</p>  <!-- Header-->
+
+            <!-- Contents here-->
+            <ul>
+                <li><strong>Three Importance:</strong>
+                    <ul>
+                        <li>Front End</li>
+                        <li>Back-end</li>
+                        <li>The third division</li>
+                    </ul>
+                </li>
+                <li><strong>What is a Full-Stack Developer?</strong>
+                    <p>A Full-Stack Developer is a professional who works on both the front-end and back-end of web applications. They have expertise in multiple technologies, including databases, server management, APIs, and user interface design.</p>
+                </li>
+                <li><strong>Conclusion:</strong>
+                    <p>Coding is a valuable skill that not only enhances career prospects but also fosters creativity and logical thinking.</p>
+                </li>
+            </ul>
+        </article>
+
+        <!-- Journal 2 -->
+        <article class="dotted">
+            <h2>Week 1 - Class 1 - Setting Up</h2>
+            <p><strong>Date:</strong> 2024/12/19</p>
+            <p>On this day and night, we learned which programs are used.</p>
+
+            <!-- Contents Here -->
+            <ul>
+                <li><strong>Programs:</strong> Programs used</li>
+                    <ul>
+                        <li>VS-Code.</li>
+                        <li>Laragon.</li>
+                        <li>Figma</li>
+                    </ul>
+                </li>
+                <li><strong>Websites and Accounts:</strong> Github.</li>
+                    <p>Code repository sites.</p>
+                </li>
+                <li><strong>Websites and Accounts:</strong> Cloudflare</li>
+                    <p>Simple web-hosting.</p>
+                </li>
+            </ul>
+        </article>
+
+        <!-- Journal 3 -->
+        <article class="dotted">
+            <h2>Week 1 - Class 2 - Introduction to HTML</h2>
+            <p><strong>Date:</strong> 2024/12/19</p>
+            <p>On this day, we learnt the basics of HTML.</p>
+
+            <!-- Contents Here -->
+            <ul>
+                <li><strong>Programs:</strong>
+                    <ul>
+                        <li>VS-Code</li>
+                        <li>Website drafting web software like Figma for quick prototyping/drafting designs of website</li>
+                        <li>Some continuation on using console</li>
+                    </ul>
+                </li>
+            </ul>
+        </article>
+
+
+        <!-- Journal 4 -->
+        <article class="dotted">
+            <h2>Week 2 - Class 1 - Introduction to Github</h2>
+            <p><strong>Date:</strong> 2024/12/24</p>
+            <p>On this day, we learnt the basics of Github and CSS</p>
+
+            <!-- Contents Here -->
+            <ul>
+                <li><strong>Before Class:</strong>
+                    <ul>
+                        <li>At work, since it's near Christmas I played around with chatgpt to create websites</li>
+                        <li>Website 1: Asked Chatgpt to create an online calculator</li>
+                        <li>Website 2: Asked chatgpt to create a quick OCR webapp</li>
+                        <li>Website 3: Asked chatgpt to create minesweeper game. Troubleshoot a bit since some functions like marker is not working</li>
+                        <li>Website 4: Asked chatgpt to create a battleship board game. It works, but the opponent player does not follow actual battleship size (its random boxes)</li>
+                        <li>Website 5: Asked chatgpt to create a knockoff whatsapp webapp. Complete with upload image. Very rudimentary</li>
+                        <li>Website 6: Asked chargpt to create a basic image board website. Able to type and display message too but no server backend so all chats will be removed if refreshed</li>
+                        <li>Tried other AI chatbots to recreate the same websites, my conclusion is. Great: Chatgpt4o, Claude. Good-ish: Gemini. Average to bad for html: Qwen, Cohere, LLama.</li>
+                        <li>Conclusion: AI is very useful for learning. </li>
+                    </ul>
+                </li>
+
+                <li><strong>Github:</strong>
+                    <ul>
+                        <li>First-time setup like git remote set-url (insert githup repo link here)</li>
+                        <li>Source control and some source tree extension</li>
+                        <li>How to create own repo. Accidentally added readme.md which makes it unable to push</li>
+                        <li>Created a new repo without readme.md. Set git remote set-url to that repo and then stage and push</li>
+                        <li>Updated all-journals.html. Pushed to new repo. Didn't see the changes on github web</li>
+                        <li>Found out I made another branch called commit-1 </li>
+                        <li>Update this journal and push it to commit-1</li>
+                    </ul>
+                </li>
+                
+                <li><strong>CSS:</strong>
+                    <ul>
+                        <li>Create a new css file to contain the styles and then link them to other html</li>
+                        <li>Background color</li>
+                        <li>Borders, dash/dots, padding, margins</li>
+                        <li>Added new interactivity like article:hover so this journal entry will also </li>
+                        <li>Updated all-journals.html. Pushed to new repo. Didn't see the changes on github web</li>
+                        <li>Found out I made another branch called commit-1 </li>
+                    </ul>
+                </li>
+
+                <li><strong>Week 2 Assignment:</strong>
+                    <ul>
+                        <li>Explore CSS and then do the website design thingy</li
+                    </ul>
+                </li>
+            </ul>
+        </article>
+    </main>
+
+    <!--journals-list.html -->
+    <section>
+        <h2>All Notes Entries</h2>
+        <ul id="journal-list">
+            <!-- Listed notes will be loaded from new-entry.html-->
+        </ul>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Asyahins </p>
+    </footer>
+
+    <!--load notes -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.getElementById("new-entry-form");
+            const latestJournal = document.getElementById("latest-journal");
+            const journalList = document.getElementById("journal-list");
+            const clearButton = document.createElement("button");
+
+            // Retrieve journal entries from localStorage
+            const getJournalEntries = () => JSON.parse(localStorage.getItem("journalEntries")) || [];
+
+            // Save journal entries to localStorage
+            const saveJournalEntries = (entries) => {
+                localStorage.setItem("journalEntries", JSON.stringify(entries));
+            };
+
+            // Add new journal entry
+            if (form) {
+                form.addEventListener("submit", (event) => {
+                    event.preventDefault();
+
+                    const date = form["entry-date"].value;
+                    const title = form["entry-title"].value;
+                    const content = form["entry-content"].value.replace(/\n/g, "<br>"); //<<  Addition retains linebreaks
+                    const tags = form["entry-tags"].value.split(",").map(tag => tag.trim());
+
+                    const entry = { date, title, content, tags };
+
+                    const entries = getJournalEntries();
+                    entries.unshift(entry); // Add to the beginning
+                    saveJournalEntries(entries);
+
+                    alert("Journal entry added!"); //Not needed
+                    form.reset();
+                });
+            }
+
+            // Display the latest journal entry
+            if (latestJournal) {
+                const entries = getJournalEntries();
+                if (entries.length > 0) {
+                    const { date, title, content, tags } = entries[0];
+                    latestJournal.innerHTML = `
+                        <h3>${title}</h3>
+                        <p><strong>Date:</strong> ${date}</p>
+                        <p>${content}</p>
+                        <p><strong>Tags:</strong> ${tags.join(", ")}</p>
+                    `;
+                } else {
+                    latestJournal.innerHTML = "<p>No journal entries yet.</p>";
+                }
+            }
+
+            // Display all journal entries
+            if (journalList) {
+                const entries = getJournalEntries();
+                if (entries.length > 0) {
+                    journalList.innerHTML = entries.map(({ date, title, content, tags }) =>  //date, title, content, tags <<--- This auto adds the fields
+                        `<li> <h3></h3>
+                            <div class="dotted">
+                            <h4>
+                                <p style="font-size: 25px">Title: ${title}</p>
+                            </h4>
+                            <p><strong>Date:</strong> ${date}</p>
+                            <p>${content}</p>
+                            <p><strong>Tags:</strong> ${tags.join(", ")}</p>
+                            <br>
+                            </div>
+                        </li>`).join("");
+
+                    // Button to clear all entries
+                    clearButton.textContent = "Clear All Entries";
+                    clearButton.addEventListener("click", () => {
+                        if (confirm("Are you sure you want to delete all journal entries?")) {
+                            localStorage.removeItem("journalEntries");
+                            journalList.innerHTML = "<p>No journal entries yet.</p>";
+                        }
+                    });
+                    journalList.insertAdjacentElement("afterend", clearButton);
+                } else {
+                    journalList.innerHTML = "<p>No journal entries yet.</p>";
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>

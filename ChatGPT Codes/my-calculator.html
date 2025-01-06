@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Scientific Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        .calculator {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+        }
+        .calculator-display {
+            display: flex;
+            flex-direction: column;
+            margin-right: 20px;
+        }
+        .input-field {
+            margin-bottom: 10px;
+            display: flex;
+        }
+        .input-field input {
+            flex: 1;
+            font-size: 18px;
+            padding: 8px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .history {
+            overflow-y: auto;
+            max-height: 300px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            font-size: 14px;
+        }
+        .history ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .history li {
+            margin-bottom: 5px;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 50px);
+            gap: 10px;
+        }
+        .buttons button {
+            font-size: 18px;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .buttons button:hover {
+            background: #0056b3;
+        }
+        .clear {
+            grid-column: span 4;
+            background: #dc3545;
+        }
+        .clear:hover {
+            background: #a71d2a;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="calculator-display">
+            <div class="input-field">
+                <input type="text" id="calculatorInput" placeholder="Enter expression">
+                <button onclick="calculate()">=</button>
+            </div>
+            <button class="clear" onclick="clearHistoryAndInput()">Clear History</button>
+            <div class="history">
+                <ul id="historyList"></ul>
+            </div>
+        </div>
+        <div class="buttons">
+            <button onclick="addInput('7')">7</button>
+            <button onclick="addInput('8')">8</button>
+            <button onclick="addInput('9')">9</button>
+            <button onclick="addInput('/')">/</button>
+
+            <button onclick="addInput('4')">4</button>
+            <button onclick="addInput('5')">5</button>
+            <button onclick="addInput('6')">6</button>
+            <button onclick="addInput('*')">*</button>
+
+            <button onclick="addInput('1')">1</button>
+            <button onclick="addInput('2')">2</button>
+            <button onclick="addInput('3')">3</button>
+            <button onclick="addInput('-')">-</button>
+
+            <button onclick="addInput('0')">0</button>
+            <button onclick="addInput('.')">.</button>
+            <button onclick="addInput('+')">+</button>
+            <button onclick="resetInput()">C</button>
+
+            <button onclick="addInput('(')">(</button>
+            <button onclick="addInput(')')">)</button>
+            <button onclick="addInput('Math.sqrt(')">√</button>
+            <button onclick="addInput('**2')">x²</button>
+
+            <button class="clear" onclick="resetInput()">Reset Input</button>
+        </div>
+    </div>
+
+    <script>
+        const inputField = document.getElementById('calculatorInput');
+        const historyList = document.getElementById('historyList');
+
+        function addInput(value) {
+            inputField.value += value;
+        }
+
+        function calculate() {
+            try {
+                const result = eval(inputField.value);
+                addHistory(inputField.value, result);
+                inputField.value = result;
+                inputField.focus();
+            } catch (error) {
+                alert('Invalid Expression');
+            }
+        }
+
+        function resetInput() {
+            inputField.value = '';
+            inputField.focus();
+        }
+
+        function clearHistory() {
+            historyList.innerHTML = '';
+        }
+
+        function clearHistoryAndInput() {
+            if (historyList.innerHTML === '') {
+                resetInput();
+            }
+            clearHistory();
+        }
+
+        function addHistory(expression, result) {
+            const historyItem = document.createElement('li');
+            historyItem.textContent = `${expression} = ${result}`;
+            historyList.appendChild(historyItem);
+        }
+
+        inputField.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                resetInput();
+            } else if (event.key === 'Enter') {
+                calculate();
+            } else if (/[^0-9+\-*/(). ]/.test(event.key) && event.key !== 'Backspace') {
+                event.preventDefault(); // Restrict invalid characters except backspace
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (document.activeElement !== inputField) {
+                inputField.focus();
+            }
+        });
+    </script>
+</body>
+</html>

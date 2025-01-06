@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinosaur Adventure</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #8BC34A;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            background: #fff;
+        }
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        #dino {
+            width: 70px;
+            height: 50px;
+            background: url('dino.png') no-repeat;
+            background-size: contain;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .obstacle {
+            width: 100px;
+            height: 50px;
+            background: url('obstacle.png') no-repeat;
+            background-size: contain;
+            position: absolute;
+            bottom: 0;
+            left: 100%;
+            animation: moveObstacle 2s linear infinite;
+        }
+        @keyframes moveObstacle {
+            0% { left: 100%; }
+            100% { left: -100px; }
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="dino"></div>
+        <div class="obstacle"></div>
+    </div>
+    <div id="gameOver">
+        <h2>Game Over!</h2>
+        <p>Press R to Restart</p>
+    </div>
+    <script>
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const gameContainer = document.getElementById('gameContainer');
+        const dino = document.getElementById('dino');
+        const obstacle = document.createElement('div');
+        obstacle.classList.add('obstacle');
+        const scoreElement = document.getElementById('score');
+        let score = 0;
+
+        const gravity = 0.5;
+        const jumpForce = -15;
+        let velocity = 0;
+        let isJumping = false;
+        let gameInterval;
+
+        const dinoImage = new Image();
+        dinoImage.src = 'dinosaur.png';
+        dinoImage.onload = function() {
+            dino.style.backgroundImage = `url(${dinoImage.src})`;
+            startGame();
+        };
+
+        function startGame() {
+            gameInterval = setInterval(update, 10);
+        }
+
+        function update() {
+            clearCanvas();
+            updateDino();
+            updateObstacle();
+            checkCollisions();
+            drawScore();
+            requestAnimationFrame(update);
+        }
+
+        function updateDino() {
+            velocity += gravity;
+            dino.style.bottom = `${Math.max(0, dino.offsetTop + velocity)}px`;
+            if (!isJumping && dino.offsetTop < 100) {
+                isJumping = true;
+                velocity = jumpForce;
+            }
+        }
+
+        function updateObstacle() {
+            velocity = 5;
+            obstacle.style.left = `${obstacle.offsetLeft + velocity}px`;
+            if (obstacle.offsetLeft > window.innerWidth) {
+                obstacle.style.left = 0;
+                score++;
+                scoreElement.textContent = `Score: ${score}`;
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function checkCollisions() {
+            if (dino.offsetTop > canvas.height || dino.offsetTop < 0) {
+                gameOver();
+            }
+            if (obstacle.offsetLeft < dino.offsetLeft + 70 &&
+                obstacle.offsetLeft + 100 > dino.offsetLeft &&
+                (dino.offsetTop < obstacle.offsetTop + 50 ||
+                    (dino.offsetTop + 50 > obstacle.offsetTop && isJumping))) {
+                gameOver();
+            }
+        }
+
+        function gameOver() {
+            clearInterval(gameInterval);
+            document.getElementById('gameOver').style.display = 'block';
+            document.body.style.cursor = 'pointer';
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'r') {
+                restartGame();
+            }
+        });
+    </script>
+</body>
+</html>

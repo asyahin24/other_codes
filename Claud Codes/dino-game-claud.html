@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dino Runner</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #gameCanvas {
+            border: 2px solid #333;
+            background-color: white;
+        }
+        #score {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="600" height="200"></canvas>
+    <div id="score">Score: 0</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('gameCanvas');
+            if (!canvas) {
+                console.error('Could not find canvas element');
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            const scoreElement = document.getElementById('score');
+
+            const GROUND_Y = canvas.height - 40;
+            const MIN_JUMP_FORCE = 8;
+            const MAX_JUMP_FORCE = 15;
+            const MAX_HOLD_TIME = 200; // Maximum time in ms to hold space for highest jump
+
+            // Game objects
+            const player = {
+                x: 50,
+                y: GROUND_Y,
+                width: 20,
+                height: 40,
+                jumping: false,
+                jumpForce: 0,
+                gravity: 0.6,
+                isOnGround: true,
+                jumpStartTime: 0
+            };
+
+            const obstacles = [];
+            let score = 0;
+            let gameSpeed = 5;
+            let gameOver = false;
+            let spacePressed = false;
+
+            function startJump() {
+                if (player.isOnGround) {
+                    player.jumping = true;
+                    player.isOnGround = false;
+                    player.jumpStartTime = Date.now();
+                    player.jumpForce = MIN_JUMP_FORCE; // Initial jump force
+                }
+            }
+
+            function continueJump() {
+                if (player.jumping && spacePressed) {
+                    const holdTime = Date.now() - player.jumpStartTime;
+                    if (holdTime < MAX_HOLD_TIME) {
+                        // Gradually increase jump force while space is held
+                        const jumpProgress = holdTime / MAX_HOLD_TIME;
+                        player.jumpForce = MIN_JUMP_FORCE + (MAX_JUMP_FORCE - MIN_JUMP_FORCE) * jumpProgress;
+                    }
+                }
+            }
+
+            function endJump() {
+                spacePressed = false;
+            }
+
+            function gameLoop() {
+                if (!gameOver) {
+                    update();
+                    draw();
+                    requestAnimationFrame(gameLoop);
+                }
+            }
+
+            function update() {
+                // Continue jump if space is still held
+                continueJump();
+
+                // Player physics
+                if (player.jumping) {
+                    player.y -= player.jumpForce;
+                    player.jumpForce -= player.gravity;
+                }
+
+                // Ground collision
+                if (player.y > GROUND_Y) {
+                    player.y = GROUND_Y;
+                    player.jumping = false;
+                    player.isOnGround = true;
+                    player.jumpForce = 0;
+                }
+
+                // Spawn obstacles
+                if (Math.random() < 0.02) {
+                    obstacles.push({
+                        x: canvas.width,
+                        y: canvas.height - 30,
+                        width: 20,
+                        height: 30
+                    });
+                }
+
+                // Update obstacles
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    const obstacle = obstacles[i];
+                    if (!obstacle) continue;
+                    
+                    obstacle.x -= gameSpeed;
+
+                    // Remove off-screen obstacles
+                    if (obstacle.x + obstacle.width < 0) {
+                        obstacles.splice(i, 1);
+                        score++;
+                        scoreElement.textContent = `Score: ${score}`;
+                        gameSpeed += 0.1;
+                    }
+
+                    // Collision detection
+                    if (checkCollision(player, obstacle)) {
+                        gameOver = true;
+                        ctx.fillStyle = '#000';
+                        ctx.font = '30px Arial';
+                        ctx.fillText('Game Over! Press Space to restart', 150, 100);
+                    }
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw player
+                ctx.fillStyle = '#333';
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+
+                // Draw obstacles
+                ctx.fillStyle = '#666';
+                obstacles.forEach(obstacle => {
+                    if (obstacle) {
+                        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                    }
+                });
+
+                // Draw ground line
+                ctx.strokeStyle = '#333';
+                ctx.beginPath();
+                ctx.moveTo(0, canvas.height);
+                ctx.lineTo(canvas.width, canvas.height);
+                ctx.stroke();
+            }
+
+            function checkCollision(a, b) {
+                return a.x < b.x + b.width &&
+                       a.x + a.width > b.x &&
+                       a.y < b.y + b.height &&
+                       a.y + a.height > b.y;
+            }
+
+            // Handle keyboard input
+            document.addEventListener('keydown', (event) => {
+                if (event.code === 'Space') {
+                    event.preventDefault();
+                    if (gameOver) {
+                        // Reset game
+                        obstacles.length = 0;
+                        score = 0;
+                        gameSpeed = 5;
+                        gameOver = false;
+                        player.y = GROUND_Y;
+                        player.jumping = false;
+                        player.isOnGround = true;
+                        player.jumpForce = 0;
+                        scoreElement.textContent = 'Score: 0';
+                        gameLoop();
+                    } else if (!spacePressed) {
+                        spacePressed = true;
+                        startJump();
+                    }
+                }
+            });
+
+            document.addEventListener('keyup', (event) => {
+                if (event.code === 'Space') {
+                    endJump();
+                }
+            });
+
+            // Start game
+            gameLoop();
+        });
+    </script>
+</body>
+</html>
